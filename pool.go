@@ -5,96 +5,114 @@ import (
 	"sync"
 )
 
+// KeyValue is a tuple of key, value
+type KeyValue[K comparable, V any] struct {
+	Key   K
+	Value V
+}
+
 // WorkerPoolFromMap starts a worker pool of size `nWorkers` and calls the function `f` for each
 // element in the `items` map
 func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, nWorkers int, f func(K, V)) {
-	sem := make(chan struct{}, nWorkers)
-	for ii := 0; ii < nWorkers; ii++ {
-		sem <- struct{}{}
-	}
-
-	var wg sync.WaitGroup
-
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for k, v := range items {
-		wg.Add(1)
-		go func(k K, v V) {
-			select {
-			case <-sem:
-				f(k, v)
-				sem <- struct{}{}
-				wg.Done()
-			case <-ctx.Done():
-				return
+	var wg sync.WaitGroup
+	wg.Add(nWorkers)
+
+	// Spawn a fixed pool of workers
+	ch := make(chan KeyValue[K, V])
+	for ii := 0; ii < nWorkers; ii++ {
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case v := <-ch:
+					f(v.Key, v.Value)
+				case <-ctx.Done():
+					return
+				}
 			}
 
-		}(k, v)
+		}()
 	}
 
+	// Push items to the workers
+	for k, v := range items {
+		ch <- KeyValue[K, V]{Key: k, Value: v}
+	}
+	// Stop all the workers
+	cancel()
+
+	// Wait for the workers to finish processing their current items
 	wg.Wait()
 }
 
 // WorkerPoolFromChan starts a worker pool of size `nWorkers` and calls the function `f` for each
 // element in the `items` channel
 func WorkerPoolFromChan[T any](ctx context.Context, items <-chan T, nWorkers int, f func(job T)) {
-	sem := make(chan struct{}, nWorkers)
-	for ii := 0; ii < nWorkers; ii++ {
-		sem <- struct{}{}
-	}
-
-	var wg sync.WaitGroup
-
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for item := range items {
-		wg.Add(1)
-		go func(v T) {
-			select {
-			case <-sem:
-				f(v)
-				sem <- struct{}{}
-				wg.Done()
-			case <-ctx.Done():
-				return
+	var wg sync.WaitGroup
+	wg.Add(nWorkers)
+
+	// Spawn a fixed pool of workers
+	for ii := 0; ii < nWorkers; ii++ {
+		go func(ii int) {
+			defer wg.Done()
+			for {
+				select {
+				case v, ok := <-items:
+					if !ok {
+						return
+					}
+					f(v)
+				case <-ctx.Done():
+					return
+				}
 			}
 
-		}(item)
+		}(ii)
 	}
 
+	// Wait for the workers to finish processing their current items
 	wg.Wait()
 }
 
 // WorkerPoolFromSlice starts a worker pool of size `nWorkers` and calls the function `f` for each
 // element in the `items` slice
 func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f func(v T)) {
-	sem := make(chan struct{}, nWorkers)
-	for ii := 0; ii < nWorkers; ii++ {
-		sem <- struct{}{}
-	}
-
-	var wg sync.WaitGroup
-
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for ii := 0; ii < len(items); ii++ {
+	var wg sync.WaitGroup
+	wg.Add(nWorkers)
 
-		wg.Add(1)
-		go func(v T) {
-			select {
-			case <-sem:
-				f(v)
-				sem <- struct{}{}
-				wg.Done()
-			case <-ctx.Done():
-				return
+	// Spawn a fixed pool of workers
+	ch := make(chan T)
+	for ii := 0; ii < nWorkers; ii++ {
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case v := <-ch:
+					f(v)
+				case <-ctx.Done():
+					return
+				}
 			}
 
-		}(items[ii])
+		}()
 	}
 
+	// Push items to the workers
+	for ii := 0; ii < len(items); ii++ {
+		ch <- items[ii]
+	}
+	// Stop all the workers
+	cancel()
+
+	// Wait for the workers to finish processing their current items
 	wg.Wait()
 }

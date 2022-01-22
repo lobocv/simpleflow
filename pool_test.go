@@ -47,11 +47,9 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromSlice() {
 
 func (s *WorkerPoolSuite) TestWorkerPoolFromChan() {
 	ctx := context.Background()
-	items := []int{0, 1, 2, 3, 4, 5}
-	itemChan := make(chan int, len(items))
-	for _, v := range items {
-		itemChan <- v
-	}
+	N := 5
+	itemChan := make(chan int, N)
+	LoadChannel(itemChan, generateSeries(N)...)
 	close(itemChan)
 
 	out := NewSyncMap(map[int]int{})
@@ -60,7 +58,7 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromChan() {
 		out.Set(v, v*v)
 	}
 	WorkerPoolFromChan(ctx, itemChan, nWorkers, f)
-	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
 	s.Equal(expected, out.m)
 }
 
