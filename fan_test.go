@@ -1,4 +1,4 @@
-package concurgo
+package simpleflow
 
 import (
 	"github.com/stretchr/testify/suite"
@@ -40,7 +40,7 @@ func (s *FanSuite) TestFanOutAndIn() {
 	// Fan them back in to a single channel. We should get the original source data with two copies of each item
 	fanInSink := make(chan int, 2*N)
 	FanIn(fanInSink, fanoutSink1, fanoutSink2)
-	faninResults := DumpChannel(fanInSink)
+	faninResults := ChannelToSlice(fanInSink)
 
 	s.ElementsMatch(faninResults, append(generateSeries(N), generateSeries(N)...))
 }

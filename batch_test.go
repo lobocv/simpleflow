@@ -1,4 +1,4 @@
-package concurgo
+package simpleflow
 
 import (
 	"github.com/stretchr/testify/suite"
@@ -49,7 +49,7 @@ func (s *BatchSuite) TestBatchChan() {
 		out := make(chan []int, expectedBatches)
 		BatchChan(items, batchsize, out)
 		close(out)
-		batches := DumpChannel(out)
+		batches := ChannelToSlice(out)
 		expected := [][]int{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}
 		s.Equal(expected, batches)
 	})
@@ -61,7 +61,7 @@ func (s *BatchSuite) TestBatchChan() {
 		out := make(chan []int, expectedBatches)
 		BatchChan(items, batchsize, out)
 		close(out)
-		batches := DumpChannel(out)
+		batches := ChannelToSlice(out)
 		expected := [][]int{{0, 1, 2, 3, 4, 5}, {6, 7, 8, 9}}
 		s.Equal(expected, batches)
 	})

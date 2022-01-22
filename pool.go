@@ -1,4 +1,4 @@
-package concurgo
+package simpleflow
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package concurgo
+package simpleflow
 
 import (
 	"github.com/stretchr/testify/suite"
@@ -29,8 +29,8 @@ func (s *RoundRobinSuite) TestRoundRobin() {
 	fanoutSink2 := make(chan int, N)
 	RoundRobin(source, fanoutSink1, fanoutSink2)
 
-	fanout1Data := DumpChannel(fanoutSink1)
-	fanout2Data := DumpChannel(fanoutSink2)
+	fanout1Data := ChannelToSlice(fanoutSink1)
+	fanout2Data := ChannelToSlice(fanoutSink2)
 
 	s.ElementsMatch(fanout1Data, []int{0, 2, 4, 6, 8})
 	s.ElementsMatch(fanout2Data, []int{1, 3, 5, 7})

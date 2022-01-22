@@ -1,4 +1,4 @@
-package concurgo
+package simpleflow
 
 // RoundRobin reads from the `from` channel and distributes the values in a round-robin fashion to the `to` channels.
 func RoundRobin[T any](from <-chan T, to ...chan<- T) {

@@ -1,4 +1,4 @@
-package concurgo
+package simpleflow
 
 // BatchSlice takes a slice and breaks it up into sub-slices of `size` length each
 func BatchSlice[T any](items []T, size int) [][]T {
