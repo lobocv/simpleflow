@@ -71,9 +71,7 @@ func WorkerPoolFromChan[T any](ctx context.Context, jobs <-chan T, nWorkers int,
 // element in the `items` slice
 func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f func(job T)) {
 	jobs := make(chan T, len(items))
-	for _, v := range items {
-		jobs <- v
-	}
+	LoadChannel(jobs, items...)
 	close(jobs)
 	WorkerPoolFromChan(ctx, jobs, nWorkers, f)
 }

@@ -12,7 +12,4 @@ func RoundRobin[T any](from <-chan T, to ...chan<- T) {
 		count++
 	}
 
-	for _, ch := range to {
-		close(ch)
-	}
 }

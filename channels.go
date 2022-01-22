@@ -24,3 +24,17 @@ func LoadChannel[T any](ch chan<- T, items ...T) {
 	}
 	return
 }
+
+// CloseMany closes all of the given channels
+func CloseMany[T any](channels ...chan T) {
+	for _, ch := range channels {
+		close(ch)
+	}
+}
+
+// CloseManyWriters closes all of the given write-only channels
+func CloseManyWriters[T any](channels ...chan<- T) {
+	for _, ch := range channels {
+		close(ch)
+	}
+}

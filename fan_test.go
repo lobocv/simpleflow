@@ -35,11 +35,11 @@ func (s *FanSuite) TestFanOutAndIn() {
 	// Fan out to two channels. Each must get a copy of the data
 	fanoutSink1 := make(chan int, N)
 	fanoutSink2 := make(chan int, N)
-	FanOut(source, fanoutSink1, fanoutSink2)
+	FanOutAndClose(source, fanoutSink1, fanoutSink2)
 
 	// Fan them back in to a single channel. We should get the original source data with two copies of each item
 	fanInSink := make(chan int, 2*N)
-	FanIn(fanInSink, fanoutSink1, fanoutSink2)
+	FanInAndClose(fanInSink, fanoutSink1, fanoutSink2)
 	faninResults := ChannelToSlice(fanInSink)
 
 	s.ElementsMatch(faninResults, append(generateSeries(N), generateSeries(N)...))
