@@ -1,5 +1,6 @@
 package concurgo
 
+// BatchSlice takes a slice and breaks it up into sub-slices of `size` length each
 func BatchSlice[T any](items []T, size int) [][]T {
 	batches := make([][]T, 0, (len(items)/size)+1)
 
@@ -18,6 +19,7 @@ func BatchSlice[T any](items []T, size int) [][]T {
 	return batches
 }
 
+// BatchMap takes a map and breaks it up into sub-maps of `size` keys each
 func BatchMap[K comparable, V any](items map[K]V, size int) []map[K]V {
 	batches := make([]map[K]V, 0, (len(items)/size)+1)
 
