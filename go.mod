@@ -1,4 +1,4 @@
-module concurgo
+module simpleflow
 
 go 1.18
 

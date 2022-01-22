@@ -1,3 +1,5 @@
+[![GoReportCard](https://goreportcard.com/badge/github.com/lobocv/simpleflow)](https://goreportcard.com/report/github.com/lobocv/simpleflow)
+
 # SimpleFlow
 
 SimpleFlow is a a collection of generic functions and patterns that help building common concurrent workflows.
