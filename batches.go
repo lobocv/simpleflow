@@ -37,3 +37,21 @@ func BatchMap[K comparable, V any](items map[K]V, size int) []map[K]V {
 
 	return batches
 }
+
+// BatchChan reads from a channel and pushes batches of size `size` onto the `to` channel
+func BatchChan[T any](items <-chan T, size int, to chan []T) {
+	batch := make([]T, 0, size)
+	for v := range items {
+		batch = append(batch, v)
+
+		if len(batch) == size {
+			to <- batch
+			batch = make([]T, 0, size)
+		}
+	}
+	if len(batch) > 0 {
+		to <- batch
+	}
+
+	return
+}

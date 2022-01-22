@@ -1,6 +1,6 @@
-# Concurgo
+# SimpleFlow
 
-Concurgo is a a collection of generic functions and patterns that help building concurrent workflows.
+SimpleFlow is a a collection of generic functions and patterns that help building common concurrent workflows.
 
 
 ## Worker Pools

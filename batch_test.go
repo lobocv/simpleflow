@@ -31,6 +31,43 @@ func (s *BatchSuite) TestBatchSlice() {
 
 }
 
+func (s *BatchSuite) TestBatchChan() {
+
+	// creates a channel populated with values
+	initData := func() chan int {
+		N := 10
+		items := make(chan int, N)
+		LoadChannel(items, generateSeries(N)...)
+		close(items)
+		return items
+	}
+
+	s.Run("integer number of batches", func() {
+		items := initData()
+		batchsize := 2
+		expectedBatches := 5
+		out := make(chan []int, expectedBatches)
+		BatchChan(items, batchsize, out)
+		close(out)
+		batches := DumpChannel(out)
+		expected := [][]int{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}
+		s.Equal(expected, batches)
+	})
+
+	s.Run("fractional number of batches", func() {
+		items := initData()
+		batchsize := 6
+		expectedBatches := 2
+		out := make(chan []int, expectedBatches)
+		BatchChan(items, batchsize, out)
+		close(out)
+		batches := DumpChannel(out)
+		expected := [][]int{{0, 1, 2, 3, 4, 5}, {6, 7, 8, 9}}
+		s.Equal(expected, batches)
+	})
+
+}
+
 func (s *BatchSuite) TestMapSlice() {
 	items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9}
 

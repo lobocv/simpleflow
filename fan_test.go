@@ -12,17 +12,6 @@ func generateSeries(n int) (series []int) {
 	return
 }
 
-func ChannelToSlice[T any](ch <-chan T, out []T) []T {
-	for v := range ch {
-		out = append(out, v)
-	}
-	return out
-}
-
-func DumpChannel[T any](ch <-chan T) (out []T) {
-	return ChannelToSlice(ch, out)
-}
-
 type FanSuite struct {
 	suite.Suite
 }
