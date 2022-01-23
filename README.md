@@ -16,7 +16,7 @@ It supports processing items in `slices`, `maps` or `channels`. The functions `W
 
 ## Fan-Out and Fan-In
 
-`FanOut` and FanIn` provide means of fanning-in and out channel to other channels. 
+`FanOut` and `FanIn` provide means of fanning-in and out channel to other channels. 
 
 ## Round Robin
 
@@ -24,4 +24,5 @@ It supports processing items in `slices`, `maps` or `channels`. The functions `W
 
 ## Batching
 
-`BatchMap` and `BatchSlice` provide ways to break `maps` and `slices` into smaller components of at most `N` size.
+`BatchMap`, `BatchSlice` and `BatchChan` provide ways to break `maps`, `slices` and `channels` into smaller
+components of at most `N` size.
