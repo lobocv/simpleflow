@@ -1,4 +1,4 @@
-module simpleflow
+module github.com/lobocv/simpleflow
 
 go 1.18
 
