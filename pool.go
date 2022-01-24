@@ -13,7 +13,7 @@ type KeyValue[K comparable, V any] struct {
 
 // WorkerPoolFromMap starts a worker pool of size `nWorkers` and calls the function `f` for each
 // element in the `items` map
-func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, nWorkers int, f func(K, V)) {
+func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, nWorkers int, f func(context.Context, K, V)) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -28,7 +28,7 @@ func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, 
 			for {
 				select {
 				case v := <-ch:
-					f(v.Key, v.Value)
+					f(ctx, v.Key, v.Value)
 				case <-ctx.Done():
 					return
 				}
@@ -50,7 +50,7 @@ func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, 
 
 // WorkerPoolFromChan starts a worker pool of size `nWorkers` and calls the function `f` for each
 // element in the `items` channel
-func WorkerPoolFromChan[T any](ctx context.Context, items <-chan T, nWorkers int, f func(job T)) {
+func WorkerPoolFromChan[T any](ctx context.Context, items <-chan T, nWorkers int, f func(ctx context.Context, item T)) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -67,7 +67,7 @@ func WorkerPoolFromChan[T any](ctx context.Context, items <-chan T, nWorkers int
 					if !ok {
 						return
 					}
-					f(v)
+					f(ctx, v)
 				case <-ctx.Done():
 					return
 				}
@@ -82,7 +82,7 @@ func WorkerPoolFromChan[T any](ctx context.Context, items <-chan T, nWorkers int
 
 // WorkerPoolFromSlice starts a worker pool of size `nWorkers` and calls the function `f` for each
 // element in the `items` slice
-func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f func(v T)) {
+func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f func(ctx context.Context, item T)) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -97,7 +97,7 @@ func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f 
 			for {
 				select {
 				case v := <-ch:
-					f(v)
+					f(ctx, v)
 				case <-ctx.Done():
 					return
 				}

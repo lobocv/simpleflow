@@ -36,7 +36,7 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromSlice() {
 	items := []int{0, 1, 2, 3, 4, 5}
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
-	f := func(v int) {
+	f := func(_ context.Context, v int) {
 		out.Set(v, v*v)
 	}
 	WorkerPoolFromSlice(ctx, items, nWorkers, f)
@@ -54,7 +54,7 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromChan() {
 
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
-	f := func(v int) {
+	f := func(_ context.Context, v int) {
 		out.Set(v, v*v)
 	}
 	WorkerPoolFromChan(ctx, itemChan, nWorkers, f)
@@ -67,7 +67,7 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromMap() {
 	items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
-	f := func(k, v int) {
+	f := func(_ context.Context, k, v int) {
 		out.Set(v, v*v)
 	}
 	WorkerPoolFromMap(ctx, items, nWorkers, f)
