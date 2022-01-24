@@ -27,7 +27,11 @@ func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, 
 			defer wg.Done()
 			for {
 				select {
-				case v := <-ch:
+				case v, ok := <-ch:
+					if !ok {
+						// If the channel is closed, exit
+						return
+					}
 					f(ctx, v.Key, v.Value)
 				case <-ctx.Done():
 					return
@@ -42,7 +46,7 @@ func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, 
 		ch <- KeyValue[K, V]{Key: k, Value: v}
 	}
 	// Stop all the workers
-	cancel()
+	close(ch)
 
 	// Wait for the workers to finish processing their current items
 	wg.Wait()
@@ -96,13 +100,16 @@ func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f 
 			defer wg.Done()
 			for {
 				select {
-				case v := <-ch:
+				case v, ok := <-ch:
+					if !ok {
+						// If the channel is closed, exit
+						return
+					}
 					f(ctx, v)
 				case <-ctx.Done():
 					return
 				}
 			}
-
 		}()
 	}
 
@@ -110,8 +117,7 @@ func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f 
 	for ii := 0; ii < len(items); ii++ {
 		ch <- items[ii]
 	}
-	// Stop all the workers
-	cancel()
+	close(ch)
 
 	// Wait for the workers to finish processing their current items
 	wg.Wait()
