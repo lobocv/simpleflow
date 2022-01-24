@@ -2,6 +2,7 @@ package simpleflow
 
 import (
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/suite"
 	"sync"
 	"testing"
@@ -42,6 +43,26 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromSlice() {
 	WorkerPoolFromSlice(ctx, items, nWorkers, f)
 
 	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+	s.Equal(expected, out.m)
+}
+
+func (s *WorkerPoolSuite) TestCancelWorkerPoolFromSlice() {
+	ctx, cancel := context.WithCancel(context.Background())
+	items := []int{0, 1, 2, 3, 4, 5}
+	out := NewSyncMap(map[int]int{})
+	nWorkers := 2
+
+	f := func(_ context.Context, v int) {
+		if v > 2 {
+			cancel()
+			return
+		}
+		out.Set(v, v*v)
+	}
+	WorkerPoolFromSlice(ctx, items, nWorkers, f)
+
+	// Only keys less than 3 should be processed
+	expected := map[int]int{0: 0, 1: 1, 2: 4}
 	s.Equal(expected, out.m)
 }
 

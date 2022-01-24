@@ -40,7 +40,7 @@ Example:
 	out := make([]int, 0, len(items))
 	nWorkers := 2
 	
-	f := func(v int) {
+	f := func(ctx context.Context, v int) {
 		out = append(out, v*v)
 	}
 	WorkerPoolFromSlice(ctx, items, nWorkers, f)

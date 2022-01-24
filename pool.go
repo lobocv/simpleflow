@@ -18,7 +18,7 @@ func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, 
 	defer cancel()
 
 	var wg sync.WaitGroup
-	wg.Add(nWorkers)
+	wg.Add(nWorkers + 1)
 
 	// Spawn a fixed pool of workers
 	ch := make(chan KeyValue[K, V])
@@ -41,12 +41,18 @@ func WorkerPoolFromMap[K comparable, V any](ctx context.Context, items map[K]V, 
 		}()
 	}
 
-	// Push items to the workers
-	for k, v := range items {
-		ch <- KeyValue[K, V]{Key: k, Value: v}
-	}
-	// Stop all the workers
-	close(ch)
+	// Push items to the workers in a separate go routine in case the channel gets blocked by a canceled worker
+	go func() {
+		defer wg.Done()
+		for k, v := range items {
+			select {
+			case ch <- KeyValue[K, V]{Key: k, Value: v}:
+			case <-ctx.Done():
+				return
+			}
+		}
+		close(ch)
+	}()
 
 	// Wait for the workers to finish processing their current items
 	wg.Wait()
@@ -91,7 +97,7 @@ func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f 
 	defer cancel()
 
 	var wg sync.WaitGroup
-	wg.Add(nWorkers)
+	wg.Add(nWorkers + 1)
 
 	// Spawn a fixed pool of workers
 	ch := make(chan T)
@@ -113,11 +119,18 @@ func WorkerPoolFromSlice[T any](ctx context.Context, items []T, nWorkers int, f 
 		}()
 	}
 
-	// Push items to the workers
-	for ii := 0; ii < len(items); ii++ {
-		ch <- items[ii]
-	}
-	close(ch)
+	// Push items to the workers in a separate go routine in case the channel gets blocked by a canceled worker
+	go func() {
+		defer wg.Done()
+		for ii := 0; ii < len(items); ii++ {
+			select {
+			case ch <- items[ii]:
+			case <-ctx.Done():
+				return
+			}
+		}
+		close(ch)
+	}()
 
 	// Wait for the workers to finish processing their current items
 	wg.Wait()
