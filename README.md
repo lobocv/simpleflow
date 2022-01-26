@@ -15,10 +15,10 @@ Some common but tedious operations on channels are done by the channel functions
 Example:
 
 ```go
-    items := make(chan int, 3)
-    LoadChannel(items, 1, 2, 3)  // pushes 1, 2, 3 onto the channel
-	close(items) // Close the channel so ChannelToSlice doesn't block.
-    out := ChannelToSlice(items) // out ---> []int{1, 2, 3}
+items := make(chan int, 3)
+LoadChannel(items, 1, 2, 3)  // pushes 1, 2, 3 onto the channel
+close(items) // Close the channel so ChannelToSlice doesn't block.
+out := ChannelToSlice(items) // out ---> []int{1, 2, 3}
 ```
 
 ## Worker Pools
@@ -31,23 +31,44 @@ Worker pools provide a way to spin up a finite set of go routines to process ite
 
 These functions block until all workers finish processing.
 
-Example:
+### Simple worker pool
 
 ```go
+ctx := context.Background()
+items := []int{0, 1, 2, 3, 4, 5}
+out := NewSyncMap(map[int]int{})
+nWorkers := 2
+f := func(_ context.Context, v int) error {
+    out.Set(v, v*v)
+    return nil
+}
+errors := WorkerPoolFromSlice(ctx, items, nWorkers, f)
+// errors ---> []error{}
+// out ---> map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+```
 
-	ctx := context.Background()
-	items := []int{0, 1, 2, 3, 4, 5}
-	out := make([]int, 0, len(items))
-	nWorkers := 2
-	
-	f := func(ctx context.Context, v int) {
-		out = append(out, v*v)
-	}
-	WorkerPoolFromSlice(ctx, items, nWorkers, f)
-	
-	// out ---> []int{4, 1, 0, 9, 25, 16}
-	 
+### Canceling a running worker pool 
 
+```go
+// Create a cancel-able context
+ctx, cancel := context.WithCancel(context.Background())
+
+items := []int{0, 1, 2, 3, 4, 5}
+out := NewSyncMap(map[int]int{}) // threadsafe map used in tests
+nWorkers := 2
+
+f := func(_ context.Context, v int) error {
+    // Cancel as soon as we hit v > 2
+    if v > 2 {
+        cancel()
+        return nil
+    }
+    out.Set(v, v*v)
+    return nil
+}
+WorkerPoolFromSlice(ctx, items, nWorkers, f)
+// errors ---> []error{}
+// out ---> map[int]int{0: 0, 1: 1, 2: 4}
 ```
 
 ## Fan-Out and Fan-In
