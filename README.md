@@ -143,3 +143,21 @@ batches := BatchMap(items, 2)
 // batches ---> []map[int]int{ {0: 0, 3: 3, 5: 5}, {1: 1, 2: 2, 4: 4}
 
 ```
+
+## Segmenting
+
+`SegmentSlice` and `SegmentMap` allow you to split a `slice` or `map` into sub-slices or maps based on the provided
+segmentation function:
+
+### Segmenting a slice into even and odd values
+```go
+items := []int{0, 1, 2, 3, 4, 5}
+
+segments := SegmentSlice(items, func(v int) int {
+    if v % 2 == 0 {
+        return "even"
+	}
+        return "odd"
+})
+// segments ---> map[string][]int{"even": {0, 2, 4}, "odd": {1, 3, 5}}
+```
