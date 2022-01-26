@@ -37,13 +37,38 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromSlice() {
 	items := []int{0, 1, 2, 3, 4, 5}
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
-	f := func(_ context.Context, v int) {
+	f := func(_ context.Context, v int) error {
 		out.Set(v, v*v)
+		return nil
 	}
-	WorkerPoolFromSlice(ctx, items, nWorkers, f)
+	errors := WorkerPoolFromSlice(ctx, items, nWorkers, f)
 
 	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
 	s.Equal(expected, out.m)
+	s.Empty(errors)
+}
+
+func (s *WorkerPoolSuite) TestWorkerPoolFromSliceWithErrors() {
+	ctx := context.Background()
+	items := []int{0, 1, 2, 3, 4, 5}
+	out := NewSyncMap(map[int]int{})
+	nWorkers := 2
+	f := func(_ context.Context, v int) error {
+		if v < 3 {
+			return fmt.Errorf("%d", v)
+		}
+		out.Set(v, v)
+		return nil
+	}
+	errors := WorkerPoolFromSlice(ctx, items, nWorkers, f)
+
+	expected := map[int]int{3: 3, 4: 4, 5: 5}
+	s.Equal(expected, out.m)
+	s.ElementsMatch(errors, []error{
+		fmt.Errorf("0"),
+		fmt.Errorf("1"),
+		fmt.Errorf("2"),
+	})
 }
 
 func (s *WorkerPoolSuite) TestCancelWorkerPoolFromSlice() {
@@ -52,12 +77,13 @@ func (s *WorkerPoolSuite) TestCancelWorkerPoolFromSlice() {
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
 
-	f := func(_ context.Context, v int) {
+	f := func(_ context.Context, v int) error {
 		if v > 2 {
 			cancel()
-			return
+			return nil
 		}
 		out.Set(v, v*v)
+		return nil
 	}
 	WorkerPoolFromSlice(ctx, items, nWorkers, f)
 
@@ -75,12 +101,39 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromChan() {
 
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
-	f := func(_ context.Context, v int) {
+	f := func(_ context.Context, v int) error {
 		out.Set(v, v*v)
+		return nil
 	}
 	WorkerPoolFromChan(ctx, itemChan, nWorkers, f)
 	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
 	s.Equal(expected, out.m)
+}
+
+func (s *WorkerPoolSuite) TestWorkerPoolFromChanWithErrors() {
+	ctx := context.Background()
+	N := 5
+	itemChan := make(chan int, N)
+	LoadChannel(itemChan, generateSeries(N)...)
+	close(itemChan)
+
+	out := NewSyncMap(map[int]int{})
+	nWorkers := 2
+	f := func(_ context.Context, v int) error {
+		out.Set(v, v)
+		if v < 3 {
+			return fmt.Errorf("%d", v)
+		}
+		return nil
+	}
+	errors := WorkerPoolFromChan(ctx, itemChan, nWorkers, f)
+	expected := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+	s.Equal(expected, out.m)
+	s.ElementsMatch(errors, []error{
+		fmt.Errorf("0"),
+		fmt.Errorf("1"),
+		fmt.Errorf("2"),
+	})
 }
 
 func (s *WorkerPoolSuite) TestWorkerPoolFromMap() {
@@ -88,11 +141,36 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromMap() {
 	items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
 	out := NewSyncMap(map[int]int{})
 	nWorkers := 2
-	f := func(_ context.Context, k, v int) {
+	f := func(_ context.Context, k, v int) error {
 		out.Set(v, v*v)
+		return nil
 	}
-	WorkerPoolFromMap(ctx, items, nWorkers, f)
+	errors := WorkerPoolFromMap(ctx, items, nWorkers, f)
 
 	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
 	s.Equal(expected, out.m)
+	s.Empty(errors)
+}
+
+func (s *WorkerPoolSuite) TestWorkerPoolFromMapWithErrors() {
+	ctx := context.Background()
+	items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+	out := NewSyncMap(map[int]int{})
+	nWorkers := 2
+	f := func(_ context.Context, k, v int) error {
+		out.Set(v, v*v)
+		if v < 3 {
+			return fmt.Errorf("%d", v)
+		}
+		return nil
+	}
+	errors := WorkerPoolFromMap(ctx, items, nWorkers, f)
+
+	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+	s.Equal(expected, out.m)
+	s.ElementsMatch(errors, []error{
+		fmt.Errorf("0"),
+		fmt.Errorf("1"),
+		fmt.Errorf("2"),
+	})
 }
