@@ -2,26 +2,19 @@ package simpleflow
 
 // BatchSlice takes a slice and breaks it up into sub-slices of `size` length each
 func BatchSlice[T any](items []T, size int) [][]T {
-	batches := make([][]T, 0, (len(items)/size)+1)
+	batches := make([][]T, 0, (len(items)+size-1)/size)
 
-	batch := make([]T, 0, size)
-	for ii := 0; ii < len(items); ii++ {
-		batch = append(batch, items[ii])
-		if len(batch) == size {
-			batches = append(batches, batch)
-			batch = make([]T, 0, size)
-		}
+	for size < len(items) {
+		items, batches = items[size:], append(batches, items[0:size:size])
 	}
-	if len(batch) > 0 {
-		batches = append(batches, batch)
-	}
+	batches = append(batches, items)
 
 	return batches
 }
 
 // BatchMap takes a map and breaks it up into sub-maps of `size` keys each
 func BatchMap[K comparable, V any](items map[K]V, size int) []map[K]V {
-	batches := make([]map[K]V, 0, (len(items)/size)+1)
+	batches := make([]map[K]V, 0, (len(items)+size-1)/size)
 
 	batch := make(map[K]V, size)
 	for k, v := range items {
