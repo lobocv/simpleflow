@@ -139,8 +139,8 @@ batches := BatchSlice(items, 2)
 
 ```go
 items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
-batches := BatchMap(items, 2)
-// batches ---> []map[int]int{ {0: 0, 3: 3, 5: 5}, {1: 1, 2: 2, 4: 4}
+batches := BatchMap(items, 3)
+// batches ---> []map[int]int{ {0: 0, 3: 3, 4: 4}, {1: 1, 2: 2, 5: 5} }
 
 ```
 
