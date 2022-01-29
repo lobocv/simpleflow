@@ -30,6 +30,27 @@ func (s *SegmentSuite) TestSegmentSlice() {
 	s.ElementsMatch(segments["odd"], []int{1, 3, 5})
 }
 
+// Segment the items in a channel into two slices, one with even values and one with odd values
+func (s *SegmentSuite) TestSegmentChan() {
+	items := make(chan int)
+
+	go func() {
+		data := []int{0, 1, 2, 3, 4, 5}
+		LoadChannel(items, data...)
+		close(items)
+	}()
+
+	segments := SegmentChan(items, func(v int) string {
+		if v%2 == 0 {
+			return "even"
+		}
+		return "odd"
+	})
+	s.Len(segments, 2)
+	s.ElementsMatch(segments["even"], []int{0, 2, 4})
+	s.ElementsMatch(segments["odd"], []int{1, 3, 5})
+}
+
 // Segment the items into two maps, one with capitalized keys and one with lower case keys
 func (s *SegmentSuite) TestSegmentMap() {
 	items := map[string]int{"One": 1, "Two": 2, "three": 3, "four": 4}

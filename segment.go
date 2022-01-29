@@ -6,6 +6,7 @@ type SegmentFunc[T any, S comparable] func(T) S
 type SegmentFuncKV[K comparable, V any, S comparable] func(K, V) S
 
 // SegmentSlice takes a slice and breaks it into smaller segmented slices using the provided function `f`
+// The segments are returned in a map where the segment is the key.
 func SegmentSlice[T any, S comparable](items []T, f SegmentFunc[T, S]) map[S][]T {
 
 	segments := make(map[S][]T)
@@ -25,6 +26,7 @@ func SegmentSlice[T any, S comparable](items []T, f SegmentFunc[T, S]) map[S][]T
 }
 
 // SegmentMap takes a map and breaks it into smaller segmented maps using the provided function `f`
+// The segments are returned in a map where the segment is the key.
 func SegmentMap[K comparable, V any, S comparable](items map[K]V, f SegmentFuncKV[K, V, S]) map[S]map[K]V {
 
 	segments := make(map[S]map[K]V)
@@ -38,6 +40,26 @@ func SegmentMap[K comparable, V any, S comparable](items map[K]V, f SegmentFuncK
 		}
 		// Add the item to the segment
 		segments[s][k] = v
+	}
+
+	return segments
+}
+
+// SegmentChan takes a channel and breaks it into smaller segmented slices using the provided function `f`
+// The segments are returned in a map where the segment is the key.
+func SegmentChan[T any, S comparable](items <-chan T, f SegmentFunc[T, S]) map[S][]T {
+
+	segments := make(map[S][]T)
+
+	for item := range items {
+		s := f(item)
+
+		// Check if a segment has already been created, if not, create one
+		if _, ok := segments[s]; !ok {
+			segments[s] = []T{}
+		}
+		// Add the item to the segment
+		segments[s] = append(segments[s], item)
 	}
 
 	return segments

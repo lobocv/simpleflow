@@ -146,7 +146,7 @@ batches := BatchMap(items, 3)
 
 ## Segmenting
 
-`SegmentSlice` and `SegmentMap` allow you to split a `slice` or `map` into sub-slices or maps based on the provided
+`SegmentSlice`, `SegmentMap` and `SegmentChan` allow you to split a `slice` or `map` into sub-slices or maps based on the provided
 segmentation function:
 
 ### Segmenting a slice into even and odd values
