@@ -48,3 +48,19 @@ func BatchChan[T any](items <-chan T, size int, to chan []T) {
 
 	return
 }
+
+func IncrementalBatchSlice[T any](items []T, batchSize int, v T) (remaining []T, batch []T) {
+	items = append(items, v)
+	if len(items) >= batchSize {
+		remaining = items[batchSize:]
+		batch = items[:batchSize]
+
+		return remaining, batch
+	}
+	if len(items) == batchSize {
+		remaining = items[:0]
+		batch = items[:batchSize]
+		return remaining, batch
+	}
+	return items, nil
+}

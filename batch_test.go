@@ -87,3 +87,51 @@ func (s *BatchSuite) TestMapSlice() {
 	})
 
 }
+
+func (s *BatchSuite) TestIncrementalBatchSliceFromEmptySlice() {
+	items := []int{}
+	N := 7
+	for ii := 0; ii < N; ii++ {
+		batchSize := 3
+		expected := []struct {
+			remaining, batch []int
+		}{
+			{remaining: []int{0}, batch: nil},
+			{remaining: []int{0, 1}, batch: nil},
+			{remaining: []int{}, batch: []int{0, 1, 2}},
+			{remaining: []int{3}, batch: nil},
+			{remaining: []int{3, 4}, batch: nil},
+			{remaining: []int{}, batch: []int{3, 4, 5}},
+			{remaining: []int{6}, batch: nil},
+		}
+
+		var batch []int
+		items, batch = IncrementalBatchSlice(items, batchSize, ii)
+		s.Equal(expected[ii].remaining, items)
+		s.Equal(expected[ii].batch, batch)
+
+	}
+}
+
+func (s *BatchSuite) TestIncrementalBatchSliceFromPrePopulatedSlice() {
+	items := []int{1, 2, 3, 4, 5, 6, 7}
+	lastItem := items[len(items)-1]
+	for ii := 0; ii < 4; ii++ {
+		next := ii + lastItem + 1
+		batchSize := 3
+		expected := []struct {
+			remaining, batch []int
+		}{
+			{remaining: []int{4, 5, 6, 7, 8}, batch: []int{1, 2, 3}},
+			{remaining: []int{7, 8, 9}, batch: []int{4, 5, 6}},
+			{remaining: []int{10}, batch: []int{7, 8, 9}},
+			{remaining: []int{10, 11}, batch: nil},
+		}
+
+		var batch []int
+		items, batch = IncrementalBatchSlice(items, batchSize, next)
+		s.Equal(expected[ii].remaining, items)
+		s.Equal(expected[ii].batch, batch)
+
+	}
+}
