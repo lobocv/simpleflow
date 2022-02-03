@@ -162,17 +162,17 @@ Example:
 batchSize := 3
 var items, batch []int
 items, batch = IncrementalBatchSlice(items, batchSize, 1)
-// items == []int{1], batch == nil
+// items == []int{1}, batch == nil
 
 items, batch = IncrementalBatchSlice(items, batchSize, 2)
-// items == []int{1, 2], batch == nil
+// items == []int{1, 2}, batch == nil
 
 items, batch = IncrementalBatchSlice(items, batchSize, 3)
 // Batch size reached
-// items == []int{], batch == []int{1, 2, 3}
+// items == []int{}, batch == []int{1, 2, 3}
 
 items, batch = IncrementalBatchSlice(items, batchSize, 4)
-// items == []int{4], batch == nil
+// items == []int{4}, batch == nil
 
 
 
