@@ -144,6 +144,34 @@ batches := BatchMap(items, 3)
 
 ```
 
+## Incremental Batching
+
+Batching can also be done incrementally by using `IncrementalBatchSlice` and `IncrementalBatchMap` functions.
+These functions are meant to be called repeatedly, adding elements until a full batch can be processed, at which time,
+the batch is returned.
+
+Example:
+
+```go
+items := []int{}
+batchSize = 3
+items, batch = IncrementalBatchSlice(items, batchSize, 1)
+// items == []int{1], batch == nil
+
+items, batch = IncrementalBatchSlice(items, batchSize, 2)
+// items == []int{1, 2], batch == nil
+
+items, batch = IncrementalBatchSlice(items, batchSize, 3)
+// Batch size reached
+// items == []int{], batch == []int{1, 2, 3}
+
+items, batch = IncrementalBatchSlice(items, batchSize, 4)
+// items == []int{4], batch == nil
+
+
+
+```
+
 ## Segmenting
 
 `SegmentSlice`, `SegmentMap` and `SegmentChan` allow you to split a `slice` or `map` into sub-slices or maps based on the provided
