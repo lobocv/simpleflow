@@ -16,9 +16,12 @@ Example:
 
 ```go
 items := make(chan int, 3)
-LoadChannel(items, 1, 2, 3)  // pushes 1, 2, 3 onto the channel
-close(items) // Close the channel so ChannelToSlice doesn't block.
-out := ChannelToSlice(items) // out ---> []int{1, 2, 3}
+// push 1, 2, 3 onto the channel
+LoadChannel(items, 1, 2, 3)
+// Close the channel so ChannelToSlice doesn't block.
+close(items) 
+out := ChannelToSlice(items)
+// out == []int{1, 2, 3}
 ```
 
 ## Worker Pools
@@ -43,8 +46,8 @@ f := func(_ context.Context, v int) error {
     return nil
 }
 errors := WorkerPoolFromSlice(ctx, items, nWorkers, f)
-// errors ---> []error{}
-// out ---> map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+// errors == []error{}
+// out == map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
 ```
 
 ### Canceling a running worker pool 
@@ -67,8 +70,8 @@ f := func(_ context.Context, v int) error {
     return nil
 }
 WorkerPoolFromSlice(ctx, items, nWorkers, f)
-// errors ---> []error{}
-// out ---> map[int]int{0: 0, 1: 1, 2: 4}
+// errors == []error{}
+// out == map[int]int{0: 0, 1: 1, 2: 4}
 ```
 
 ## Fan-Out and Fan-In
@@ -95,7 +98,8 @@ FanOutAndClose(source, fanoutSink1, fanoutSink2)
 // Fan them back in to a single channel. We should get the original source data with two copies of each item
 fanInSink := make(chan int, 2*N)
 FanInAndClose(fanInSink, fanoutSink1, fanoutSink2)
-faninResults := ChannelToSlice(fanInSink) // faninResults ---> []int{1, 2, 3, 1, 2, 3}
+fanInResults := ChannelToSlice(fanInSink)
+// fanInResults == []int{1, 2, 3, 1, 2, 3}
 ```
 
 ## Round Robin
@@ -115,13 +119,15 @@ for _, v := range data {
 close(source)
 
 // Round robin the data into two channels, each should have half the data
-fanoutSink1 := make(chan int, N)
-fanoutSink2 := make(chan int, N)
-RoundRobin(source, fanoutSink1, fanoutSink2)
-CloseManyWriters(fanoutSink1, fanoutSink2)
+sink1 := make(chan int, N)
+sink2 := make(chan int, N)
+RoundRobin(source, fanoutSink1, sink2)
+CloseManyWriters(fanoutSink1, sink2)
 
-fanout1Data := ChannelToSlice(fanoutSink1) // fanout1Data ---> []int{1, 3, 5}
-fanout2Data := ChannelToSlice(fanoutSink2) // fanout2Data ---> []int{2, 4}
+sink1Data := ChannelToSlice(sink1)
+// sink1Data == []int{1, 3, 5}
+sink2Data := ChannelToSlice(sink2)
+// sink2Data == []int{2, 4}
 ```
 
 ## Batching
@@ -134,13 +140,13 @@ Example:
 ```go
 items := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 batches := BatchSlice(items, 2)
-// batches ---> [][]int{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}
+// batches == [][]int{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}
 ```
 
 ```go
 items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
 batches := BatchMap(items, 3)
-// batches ---> []map[int]int{ {0: 0, 3: 3, 4: 4}, {1: 1, 2: 2, 5: 5} }
+// batches == []map[int]int{ {0: 0, 3: 3, 4: 4}, {1: 1, 2: 2, 5: 5} }
 
 ```
 
@@ -153,8 +159,8 @@ the batch is returned.
 Example:
 
 ```go
-items := []int{}
-batchSize = 3
+batchSize := 3
+var items, batch []int
 items, batch = IncrementalBatchSlice(items, batchSize, 1)
 // items == []int{1], batch == nil
 
@@ -187,5 +193,5 @@ segments := SegmentSlice(items, func(v int) int {
 	}
         return "odd"
 })
-// segments ---> map[string][]int{"even": {0, 2, 4}, "odd": {1, 3, 5}}
+// segments == map[string][]int{"even": {0, 2, 4}, "odd": {1, 3, 5}}
 ```
