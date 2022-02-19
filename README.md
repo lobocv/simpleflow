@@ -1,6 +1,7 @@
 [![GoReportCard](https://goreportcard.com/badge/github.com/lobocv/simpleflow)](https://goreportcard.com/report/github.com/lobocv/simpleflow)
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-95%25-brightgreen.svg?longCache=true&style=flat)</a>
-
+![Build Status](https://github.com/lobocv/simpleflow/actions/workflows/build.yaml/badge.svg)
+[<img src="https://img.shields.io/github/license/lobocv/simpleflow">](https://img.shields.io/github/license/lobocv/simpleflow)
 
 
 # SimpleFlow
