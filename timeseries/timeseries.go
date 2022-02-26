@@ -13,7 +13,9 @@ type Entry[V any] struct {
 	Value V
 }
 
-// TimeSeries keeps track of values for a series of times
+// TimeSeries keeps track of values for a series of times. Values are not expected to be contiguous
+// as they are stored in an underlying map. Time granularity can be enforced by providing a TimeTransformation
+// function. This function can be used to round all values to their closest minute, hour or day.
 type TimeSeries[V any] struct {
 	values map[time.Time]V
 	tf     TimeTransformation
