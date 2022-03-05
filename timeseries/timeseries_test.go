@@ -119,7 +119,7 @@ func (s *TestSuite) TestIterateExitEarly() {
 		Day(4): 3,
 	},
 		TF)
-	s.Equal(4, Length(ts))
+	s.Equal(5, Length(ts))
 
 	ch, done := Iterate(ts)
 	defer done()
