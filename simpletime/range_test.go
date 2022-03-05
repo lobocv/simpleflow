@@ -64,4 +64,29 @@ func (s TestSuite) TestRangeIntersectsAndContains() {
 
 	s.True(r1.ContainsRange(r1, true))
 	s.False(r1.ContainsRange(r1, false))
+
+	// Test left edge
+	s.True(r2.Contains(Date(2021, 01, 10), true))
+	s.False(r2.Contains(Date(2021, 01, 10), false))
+
+	// Test middle
+	s.True(r2.Contains(Date(2021, 01, 11), true))
+	s.True(r2.Contains(Date(2021, 01, 12), true))
+
+	// Test right edge
+	s.True(r2.Contains(Date(2021, 01, 15), true))
+	s.False(r2.Contains(Date(2021, 01, 15), false))
+}
+
+func (s TestSuite) TestRangeDuration() {
+	delta := 20 * time.Minute
+	t1 := time.Now()
+	t2 := t1.Add(delta)
+
+	r := Range{
+		Start: t1,
+		End:   t2,
+	}
+
+	s.Equal(r.Duration(), delta)
 }

@@ -1,10 +1,11 @@
 package timeseries
 
 import (
+	"github.com/lobocv/simpleflow/v0/simpletime"
 	"time"
 )
 
-// TimeTransformation converts one time to another. It is mainly used to set the granularity of a time series
+// TimeTransformation converts one time to another. It is primarily used to set the granularity of a time series
 type TimeTransformation func(time.Time) time.Time
 
 // Entry is a specific entry in a time series, it contains a value at a specific time
@@ -41,14 +42,20 @@ func Length[V any](m TimeSeries[V]) int {
 	return len(m.values)
 }
 
-// Join merges the second time series values into the first time series
+// Merge merges the second time series values into the first time series
 // Values are overwritten by the provided time series if they already exist
-func Join[V any](ts, other TimeSeries[V]) {
-	iter, done := IterateTimeSeries(other)
+func Merge[V any](ts, other TimeSeries[V]) {
+	iter, done := Iterate(other)
 	defer done()
 	for e := range iter {
 		Set(ts, e.Time, e.Value)
 	}
+}
+
+// Get gets a value at a specific date in the time series
+func Get[V any](m TimeSeries[V], date time.Time) (V, bool) {
+	v, ok := m.values[m.tf(date)]
+	return v, ok
 }
 
 // Set sets a value at a specific date in the time series
@@ -61,9 +68,9 @@ func Unset[V any](m TimeSeries[V], date time.Time) {
 	delete(m.values, m.tf(date))
 }
 
-// IterateTimeSeries returns a read-only channel and a close function to iterate time series values
-// Note that this does not iterate in chronological order
-func IterateTimeSeries[V any](ts TimeSeries[V]) (<-chan Entry[V], func()) {
+// Iterate returns a read-only channel and a close function to iterate through all time series values
+// Note that this does not iterate in chronological order.
+func Iterate[V any](ts TimeSeries[V]) (<-chan Entry[V], func()) {
 	iter := make(chan Entry[V])
 	done := make(chan struct{}, 2) // nolint
 
@@ -79,6 +86,41 @@ func IterateTimeSeries[V any](ts TimeSeries[V]) (<-chan Entry[V], func()) {
 			dm := Entry[V]{
 				Time:  date,
 				Value: m,
+			}
+			select {
+			case iter <- dm:
+			case <-done:
+				return
+			}
+		}
+	}()
+	return iter, closer
+}
+
+// OrderedIterate returns a read-only channel and a close function to iterate through time series values in
+// the given range and step. For time entries that do not exist in the time series, nothing is returned.
+func OrderedIterate[V any](ts TimeSeries[V], start, end time.Time, step time.Duration) (<-chan Entry[V], func()) {
+	iter := make(chan Entry[V])
+	done := make(chan struct{}, 2) // nolint
+
+	// define a closer function which we can pass back in case the caller wants to end iteration early
+	closer := func() {
+		done <- struct{}{}
+	}
+
+	// start a go routine that iterates the map and sends the values on a channel
+	go func() {
+		defer close(iter)
+		it := simpletime.NewIterator(start, end, step)
+		for it.Next() {
+			date := ts.tf(it.Current())
+			v, ok := Get(ts, date)
+			if !ok {
+				continue
+			}
+			dm := Entry[V]{
+				Time:  date,
+				Value: v,
 			}
 			select {
 			case iter <- dm:
