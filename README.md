@@ -196,3 +196,47 @@ segments := SegmentSlice(items, func(v int) int {
 })
 // segments == map[string][]int{"even": {0, 2, 4}, "odd": {1, 3, 5}}
 ```
+
+# Time
+
+The `simeplflow/time` package provides functions that assist with working with the standard library `time` package
+and `time.Time` objects. The package contains functions to define, compare and iterate time ranges.
+
+# Timeseries
+
+The `simpleflow/timeseries` packages contains a generic `TimeSeries` object that allows you
+to manipulate timestamped data. `TimeSeries` store unordered time series data in an underlying 
+`map[time.Time]V`. Each `TimeSeries` is configured with a `TimeTransformation` which applies to each
+`time.Time` key when accessed. This makes storing time series data with a particular time granularity
+easy. For example, with a `TimeTransformation` that truncates to the day, any 
+`time.Time` object in the given day will access the same key.
+
+Example:
+
+```go
+// TF is a TimeTransformation that truncates the time to the start of the day
+func TF(t time.Time) time.Time {
+    return t.UTC().Truncate(24 * time.Hour)
+}
+
+// Day is a function to create a Time object on a given day offset from Jan 1st 2022 by the `i`th day
+func Day(i int) time.Time {
+    return time.Date(2022, 01, i, 0, 0, 0, 0, time.UTC)
+}
+
+func main() {
+    data := map[time.Time]int{
+            Day(0): 0, // Jan 1st 2022
+            Day(1): 1, // Jan 2nd 2022
+            Day(2): 2, // Jan 3rd 2022
+        }
+    ts := timeseries.NewTimeSeries(data, TF)
+	
+	// Get the value on Jan 2th at 4am and at 5 am
+	// The values for `a` and `b` are both == 1 because the hour is irrelevant
+	// when accessing data using the TF() time transform
+	a := timeseries.Get(ts, time.Date(2022, 01, 2, 4, 0, 0, 0, time.UTC))
+	b := timeseries.Get(ts, time.Date(2022, 01, 2, 5, 0, 0, 0, time.UTC))
+	// a == b == 1 
+}
+```

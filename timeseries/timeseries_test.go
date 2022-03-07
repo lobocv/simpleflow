@@ -13,7 +13,6 @@ func TF(t time.Time) time.Time {
 
 func Day(i int) time.Time {
 	return time.Date(2022, 01, i, rand.Intn(23), rand.Intn(59), 7, 8, time.UTC)
-
 }
 
 type TestSuite struct {
