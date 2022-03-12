@@ -38,39 +38,39 @@ func NewTimeSeries[V any](m map[time.Time]V, timeGranularity TimeTransformation)
 }
 
 // Length return the length of the time series
-func Length[V any](m TimeSeries[V]) int {
+func (m TimeSeries[V]) Length() int {
 	return len(m.values)
 }
 
 // Merge merges the second time series values into the first time series
 // Values are overwritten by the provided time series if they already exist
-func Merge[V any](ts, other TimeSeries[V]) {
-	iter, done := Iterate(other)
+func (m TimeSeries[V]) Merge(other TimeSeries[V]) {
+	iter, done := other.Iterate()
 	defer done()
 	for e := range iter {
-		Set(ts, e.Time, e.Value)
+		m.Set(e.Time, e.Value)
 	}
 }
 
 // Get gets a value at a specific date in the time series
-func Get[V any](m TimeSeries[V], date time.Time) (V, bool) {
+func (m TimeSeries[V]) Get(date time.Time) (V, bool) {
 	v, ok := m.values[m.tf(date)]
 	return v, ok
 }
 
 // Set sets a value at a specific date in the time series
-func Set[V any](m TimeSeries[V], date time.Time, v V) {
+func (m TimeSeries[V]) Set(date time.Time, v V) {
 	m.values[m.tf(date)] = v
 }
 
 // Unset removes a value at a specific date in the time series
-func Unset[V any](m TimeSeries[V], date time.Time) {
+func (m TimeSeries[V]) Unset(date time.Time) {
 	delete(m.values, m.tf(date))
 }
 
 // Iterate returns a read-only channel and a close function to iterate through all time series values
 // Note that this does not iterate in chronological order.
-func Iterate[V any](ts TimeSeries[V]) (<-chan Entry[V], func()) {
+func (m TimeSeries[V]) Iterate() (<-chan Entry[V], func()) {
 	iter := make(chan Entry[V])
 	done := make(chan struct{}, 2) // nolint
 
@@ -82,7 +82,7 @@ func Iterate[V any](ts TimeSeries[V]) (<-chan Entry[V], func()) {
 	// start a go routine that iterates the map and sends the values on a channel
 	go func() {
 		defer close(iter)
-		for date, m := range ts.values {
+		for date, m := range m.values {
 			dm := Entry[V]{
 				Time:  date,
 				Value: m,
@@ -99,7 +99,7 @@ func Iterate[V any](ts TimeSeries[V]) (<-chan Entry[V], func()) {
 
 // OrderedIterate returns a read-only channel and a close function to iterate through time series values in
 // the given range and step. For time entries that do not exist in the time series, nothing is returned.
-func OrderedIterate[V any](ts TimeSeries[V], start, end time.Time, step time.Duration) (<-chan Entry[V], func()) {
+func (m TimeSeries[V]) OrderedIterate(start, end time.Time, step time.Duration) (<-chan Entry[V], func()) {
 	iter := make(chan Entry[V])
 	done := make(chan struct{}, 2) // nolint
 
@@ -113,8 +113,8 @@ func OrderedIterate[V any](ts TimeSeries[V], start, end time.Time, step time.Dur
 		defer close(iter)
 		it := simpletime.NewIterator(start, end, step)
 		for it.Next() {
-			date := ts.tf(it.Current())
-			v, ok := Get(ts, date)
+			date := m.tf(it.Current())
+			v, ok := m.Get(date)
 			if !ok {
 				continue
 			}

@@ -235,8 +235,8 @@ func main() {
 	// Get the value on Jan 2th at 4am and at 5 am
 	// The values for `a` and `b` are both == 1 because the hour is irrelevant
 	// when accessing data using the TF() time transform
-	a := timeseries.Get(ts, time.Date(2022, 01, 2, 4, 0, 0, 0, time.UTC))
-	b := timeseries.Get(ts, time.Date(2022, 01, 2, 5, 0, 0, 0, time.UTC))
+	a := ts.Get(time.Date(2022, 01, 2, 4, 0, 0, 0, time.UTC))
+	b := ts.Get(time.Date(2022, 01, 2, 5, 0, 0, 0, time.UTC))
 	// a == b == 1 
 }
 ```

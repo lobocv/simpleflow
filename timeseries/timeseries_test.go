@@ -27,29 +27,29 @@ func TestTimeSeries(t *testing.T) {
 func (s *TestSuite) TestSetAndUnset() {
 
 	ts := NewTimeSeries(map[time.Time]int{}, TF)
-	s.Zero(Length(ts))
-	Set(ts, Day(0), 0)
-	Set(ts, Day(1), 1)
-	Set(ts, Day(2), 2)
-	s.Equal(3, Length(ts))
+	s.Zero(ts.Length())
+	ts.Set(Day(0), 0)
+	ts.Set(Day(1), 1)
+	ts.Set(Day(2), 2)
+	s.Equal(3, ts.Length())
 	s.Equal(map[time.Time]int{TF(Day(0)): 0, TF(Day(1)): 1, TF(Day(2)): 2}, ts.values)
 
 	// Get individual dates
 	for ii := 0; ii < 3; ii++ {
-		got, ok := Get(ts, Day(ii))
+		got, ok := ts.Get(Day(ii))
 		s.True(ok)
 		s.Equal(got, ii)
 	}
 
 	// Get dates not in the timeseries
 	for ii := 3; ii < 10; ii++ {
-		got, ok := Get(ts, Day(ii))
+		got, ok := ts.Get(Day(ii))
 		s.False(ok)
 		s.Equal(got, 0)
 	}
 
-	Unset(ts, Day(2))
-	s.Equal(2, Length(ts))
+	ts.Unset(Day(2))
+	s.Equal(2, ts.Length())
 	s.Equal(map[time.Time]int{TF(Day(0)): 0, TF(Day(1)): 1}, ts.values)
 }
 
@@ -60,9 +60,9 @@ func (s *TestSuite) TestIterate() {
 		Day(2): 2,
 	},
 		TF)
-	s.Equal(3, Length(ts))
+	s.Equal(3, ts.Length())
 
-	ch, done := Iterate(ts)
+	ch, done := ts.Iterate()
 	defer done()
 
 	var got []Entry[int]
@@ -91,7 +91,7 @@ func (s *TestSuite) TestOrderedIterate() {
 	start := time.Date(2022, 01, 1, 0, 0, 0, 0, time.UTC)
 	stop := time.Date(2022, 01, 6, 5, 0, 0, 0, time.UTC)
 	step := 24 * time.Hour
-	ch, done := OrderedIterate(ts, start, stop, step)
+	ch, done := ts.OrderedIterate(start, stop, step)
 	defer done()
 
 	var got []Entry[int]
@@ -118,9 +118,9 @@ func (s *TestSuite) TestIterateExitEarly() {
 		Day(4): 3,
 	},
 		TF)
-	s.Equal(5, Length(ts))
+	s.Equal(5, ts.Length())
 
-	ch, done := Iterate(ts)
+	ch, done := ts.Iterate()
 	defer done()
 
 	var got []Entry[int]
@@ -138,12 +138,12 @@ func (s *TestSuite) TestIterateExitEarly() {
 	s.Len(got, 3)
 }
 
-func (s *TestSuite) TestJoin() {
+func (s *TestSuite) TestMerge() {
 	ts1 := NewTimeSeries(map[time.Time]int{Day(0): 0, Day(1): 1, Day(2): 2}, TF)
 	ts2 := NewTimeSeries(map[time.Time]int{Day(2): 20, Day(3): 30, Day(4): 40}, TF)
 
-	Merge(ts1, ts2)
-	s.Equal(5, Length(ts1))
+	ts1.Merge(ts2)
+	s.Equal(5, ts1.Length())
 	s.Equal(map[time.Time]int{
 		TF(Day(0)): 0,
 		TF(Day(1)): 1,
