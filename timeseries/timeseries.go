@@ -1,7 +1,7 @@
 package timeseries
 
 import (
-	"github.com/lobocv/simpleflow/v0/time"
+	"github.com/lobocv/simpleflow/time"
 	"time"
 )
 
