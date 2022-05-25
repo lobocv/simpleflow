@@ -197,6 +197,30 @@ segments := SegmentSlice(items, func(v int) int {
 // segments == map[string][]int{"even": {0, 2, 4}, "odd": {1, 3, 5}}
 ```
 
+# Deduplication
+A series of values can be deduplicated using the `Deduplicator{}`. It can either accept the entire slice:
+
+```go
+deduped := Deduplicate([]int{1, 1, 2, 2, 3, 3})
+// deduped == []int{1, 2, 3}
+```
+or iteratively deduplicate for situations where you want fine control with a `for` loop.
+```go
+dd := NewDeduplicator[int]()
+values := []int{1, 1, 2, 3, 3}
+deduped := []int{}
+
+for _, v := range values {
+    seen := dd.Seen(v) 
+    // seen == true for index 1 and 4
+    isNew := dd.Add(v) 
+    // isNew == true for index 0, 2 and 3
+    if isNew {
+        deduped = append(deduped, v)	
+    }
+}
+```
+
 # Time
 
 The `simeplflow/time` package provides functions that assist with working with the standard library `time` package
