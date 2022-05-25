@@ -110,6 +110,30 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromChan() {
 	s.Equal(expected, out.m)
 }
 
+func (s *WorkerPoolSuite) TestWorkerPoolFromChanCancelled() {
+	ctx, cancel := context.WithCancel(context.Background())
+	N := 100
+	itemChan := make(chan int, N)
+	LoadChannel(itemChan, generateSeries(N)...)
+	close(itemChan)
+
+	out := NewSyncMap(map[int]int{})
+	nWorkers := 2
+	f := func(_ context.Context, v int) error {
+		if v > 2 {
+			cancel()
+			return nil
+		}
+		out.Set(v, v*v)
+		return nil
+	}
+	errors := WorkerPoolFromChan(ctx, itemChan, nWorkers, f)
+	// It's not easy to test exactly how many items should get processed due to race conditions,
+	// so for now just check that not all items were processed.
+	s.NotEqual(len(out.m), N)
+	s.Empty(errors)
+}
+
 func (s *WorkerPoolSuite) TestWorkerPoolFromChanWithErrors() {
 	ctx := context.Background()
 	N := 5
@@ -149,6 +173,26 @@ func (s *WorkerPoolSuite) TestWorkerPoolFromMap() {
 
 	expected := map[int]int{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
 	s.Equal(expected, out.m)
+	s.Empty(errors)
+}
+
+func (s *WorkerPoolSuite) TestWorkerPoolFromMapCancelled() {
+	ctx, cancel := context.WithCancel(context.Background())
+	items := map[int]int{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+	out := NewSyncMap(map[int]int{})
+	nWorkers := 2
+	f := func(_ context.Context, k, v int) error {
+		if k > 2 {
+			cancel()
+			return nil
+		}
+		out.Set(v, v*v)
+		return nil
+	}
+	errors := WorkerPoolFromMap(ctx, items, nWorkers, f)
+	// It's not easy to test exactly how many items should get processed due to race conditions,
+	// so for now just check that not all items were processed.
+	s.NotEqual(len(out.m), len(items))
 	s.Empty(errors)
 }
 

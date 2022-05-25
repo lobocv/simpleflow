@@ -33,3 +33,13 @@ func (s *RoundRobinSuite) TestRoundRobin() {
 	s.ElementsMatch(fanout1Data, []int{0, 2, 4, 6, 8})
 	s.ElementsMatch(fanout2Data, []int{1, 3, 5, 7})
 }
+
+func (s *RoundRobinSuite) TestRoundRobinEmptyTo() {
+	N := 9
+	// Generate some data on a channel (source for fan out)
+	source := make(chan int, N)
+	LoadChannel(source, generateSeries(N)...)
+	close(source)
+
+	RoundRobin(source)
+}
