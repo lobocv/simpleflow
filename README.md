@@ -221,6 +221,27 @@ for _, v := range values {
 }
 ```
 
+Complex objects can also be deduplicated using the `ObjectDeduplicator{}`, which requires providing a function that
+creates unique IDs for the provided objects being deduplicated. This is useful for situations where the values being 
+deduplicated are not comparable (ie, have a slice field) or if you want more fine control over just what constitutes a 
+duplicate.
+
+```go
+// Object is a complex structure that cannot be used with a regular Deduplicator as it contains a slice field, and
+// thus is not `comparable`.
+type Object struct {
+    slice   []int
+    pointer *int
+    value   string
+}
+
+// Create a deduplicator that deduplicates Object's by their "value" field.
+dd := NewObjectDeduplicator[Object](func(v Object) string {
+        return v.value
+    })
+```
+
+
 # Time
 
 The `simeplflow/time` package provides functions that assist with working with the standard library `time` package
