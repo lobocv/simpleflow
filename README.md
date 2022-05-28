@@ -1,13 +1,38 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/lobocv/simplerr.svg)](https://pkg.go.dev/github.com/lobocv/simpleflow)
+![Build Status](https://github.com/lobocv/simpleflow/actions/workflows/build.yaml/badge.svg)
 [![GoReportCard](https://goreportcard.com/badge/github.com/lobocv/simpleflow)](https://goreportcard.com/report/github.com/lobocv/simpleflow)
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-100%25-brightgreen.svg?longCache=true&style=flat)</a>
-![Build Status](https://github.com/lobocv/simpleflow/actions/workflows/build.yaml/badge.svg)
 [<img src="https://img.shields.io/github/license/lobocv/simpleflow">](https://img.shields.io/github/license/lobocv/simpleflow)
 
 
 # SimpleFlow
 
-SimpleFlow is a a collection of generic functions and patterns that help building common concurrent workflows.
+SimpleFlow is a a collection of generic functions and patterns that help building common workflows.
 Please see the tests for examples on how to use these functions.
+
+## Why should I use Simpleflow?
+
+- A single library for common workflows so you do not have to reinvent the wheel, maintain your own library or
+  copy-paste code.
+- Simple and easy to use API.
+- Detailed documentation and examples. 
+- Worker pools are simple, worker pools with error handling is not.
+- 100% test coverage
+
+## Table of Contents
+
+1. [Channels](https://github.com/lobocv/simpleflow#channels)
+2. [Work Pools](https://github.com/lobocv/simpleflow#worker-pools)
+   1. [Example](https://github.com/lobocv/simpleflow#workerpoolfromslice-example)
+   2. [Canceling a running worker pool](https://github.com/lobocv/simpleflow#canceling-a-running-worker-pool)
+3. [Fan-Out and Fan-In](https://github.com/lobocv/simpleflow#fan-out-and-fan-in)
+4. [Round Robin](https://github.com/lobocv/simpleflow#round-robin)
+5. [Batching](https://github.com/lobocv/simpleflow#batching)
+6. [Incremental Batching](https://github.com/lobocv/simpleflow#incremental-batching)
+7. [Segmenting](https://github.com/lobocv/simpleflow#segmenting)
+8. [Deduplication](https://github.com/lobocv/simpleflow#deduplication)
+9. [Time](https://github.com/lobocv/simpleflow#time)
+10. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
 
 ## Channels
 
@@ -35,7 +60,7 @@ Worker pools provide a way to spin up a finite set of go routines to process ite
 
 These functions block until all workers finish processing.
 
-### Simple worker pool
+### WorkerPoolFromSlice example
 
 ```go
 ctx := context.Background()
