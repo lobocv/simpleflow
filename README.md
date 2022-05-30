@@ -16,7 +16,7 @@ Please see the tests for examples on how to use these functions.
   copy-paste code.
 - Simple and easy to use API.
 - Detailed documentation and examples. 
-- Worker pools are simple, worker pools with error handling is not.
+- Worker pools are simple, worker pools with error handling are not.
 - 100% test coverage
 
 ## Table of Contents
@@ -31,8 +31,9 @@ Please see the tests for examples on how to use these functions.
 6. [Incremental Batching](https://github.com/lobocv/simpleflow#incremental-batching)
 7. [Segmenting](https://github.com/lobocv/simpleflow#segmenting)
 8. [Deduplication](https://github.com/lobocv/simpleflow#deduplication)
-9. [Time](https://github.com/lobocv/simpleflow#time)
-10. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
+9. [Counter](https://github.com/lobocv/simpleflow#counter)
+10. [Time](https://github.com/lobocv/simpleflow#time)
+11. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
 
 ## Channels
 
@@ -252,8 +253,8 @@ deduplicated are not comparable (ie, have a slice field) or if you want more fin
 duplicate.
 
 ```go
-// Object is a complex structure that cannot be used with a regular Deduplicator as it contains a slice field, and
-// thus is not `comparable`.
+// Object is a complex structure that cannot be used with a regular Deduplicator as it contains 
+// a slice field, and thus is not `comparable`.
 type Object struct {
     slice   []int
     pointer *int
@@ -262,6 +263,43 @@ type Object struct {
 
 // Create a deduplicator that deduplicates Object's by their "value" field.
 dd := NewObjectDeduplicator[Object](func(v Object) string {
+        return v.value
+    })
+```
+
+
+# Counter
+The `Counter{}` and `ObjectCounter{}` can be used to count the number of occurrences
+of values. Much like the `Deduplicator{}`, the `Counter{}` works well for simple types.
+
+```go
+counter := NewCounter[int]()
+values := []int{1, 1, 2, 3, 3, 3, 3}
+
+// Add the values to the counter, values can also be added individually with counter.Add()
+currentCount := counter.AddMany(values) 
+
+numberOfOnes := counter.Count(1) // returns 2
+numberOfTwos := counter.Count(2) // returns 1
+numberOfThrees := counter.Count(3) // returns 4
+```
+
+Complex objects can also be counted using the `ObjectCounter{}`, which requires providing a function that
+creates buckets for the provided objects being deduplicated. This is useful for situations where the values being
+counted are not comparable (ie, have a slice field) or if you want more fine control over the bucketing logic (ie
+bucket objects by a certain field value).
+
+```go
+// Object is a complex structure that cannot be used with a regular Counter as it contains 
+// a slice field, and thus is not `comparable`.
+type Object struct {
+    slice   []int
+    pointer *int
+    value   string
+}
+
+// Create a counter that counts Object's bucketed by their "value" field.
+counter := NewObjectCounter[Object](func(v Object) string {
         return v.value
     })
 ```
