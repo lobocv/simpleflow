@@ -40,7 +40,7 @@ func (s *DeDuplicateSuite) TestDeduplicateSlice() {
 	s.ElementsMatch(deduped, []int{1, 2, 3, 4, 5, 6})
 
 	deduped = dd.Deduplicate(values)
-	s.Nil(deduped)
+	s.ElementsMatch(deduped, []int{})
 
 	dd.Reset()
 	deduped = dd.Deduplicate(values)
@@ -52,6 +52,20 @@ func (s *DeDuplicateSuite) TestDeduplicateSlice() {
 	dd.Reset()
 	dedupedIndices := dd.DeduplicateIndices(values)
 	s.ElementsMatch(dedupedIndices, []int{3, 7, 8})
+}
+
+func (s *DeDuplicateSuite) TestDeduplicateNilSlice() {
+	s.Run("empty slice should return empty slice", func() {
+		dd := NewDeduplicator[int]()
+		deduped := dd.Deduplicate([]int{})
+		s.Equal(deduped, []int{})
+	})
+
+	s.Run("nil slice should return nil slice", func() {
+		dd := NewDeduplicator[int]()
+		deduped := dd.Deduplicate(nil)
+		s.Nil(deduped)
+	})
 
 }
 

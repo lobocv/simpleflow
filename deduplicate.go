@@ -34,6 +34,9 @@ func (dd *Deduplicator[T]) Reset() {
 // Deduplicate returns a newly allocated slice without duplicate values by comparing it against values previously
 // seen by the Deduplicator{}
 func (dd *Deduplicator[T]) Deduplicate(values []T) []T {
+	if len(values) == 0 {
+		return values
+	}
 	var deduped []T
 	for _, v := range values {
 		if dd.Add(v) {
