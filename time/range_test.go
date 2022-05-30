@@ -1,23 +1,8 @@
 package simpletime
 
 import (
-	"github.com/stretchr/testify/suite"
-	"testing"
 	"time"
 )
-
-func Date(y, m, d int) time.Time {
-	return time.Date(y, time.Month(m), d, 0, 0, 0, 0, time.UTC)
-}
-
-type TestSuite struct {
-	suite.Suite
-}
-
-func TestTime(t *testing.T) {
-	s := new(TestSuite)
-	suite.Run(t, s)
-}
 
 func (s TestSuite) TestCombineRanges() {
 
