@@ -33,4 +33,21 @@ jobs:
 
       # Run tests
       - name: Run tests
-        run: go test ./... -v -count=1 -race
+        run: go test ./... -v -count=1 -race -coverprofile coverage.out
+
+      # Test Coverage check
+      - name: Test Coverage - Test coverage shall be above threshold
+        env:
+          TESTCOVERAGE_THRESHOLD: 100
+        run: |
+          echo "Quality Gate: checking test coverage is above threshold ..."
+          echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"
+          totalCoverage=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "Current test coverage : $totalCoverage %"
+          if (( $(echo "$totalCoverage $TESTCOVERAGE_THRESHOLD" | awk '{print ($1 >= $2)}') )); then
+              echo "OK"
+          else
+              echo "Current test coverage is below threshold. Please add more unit tests."
+              echo "Failed"
+              exit 1
+          fi
