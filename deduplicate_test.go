@@ -55,6 +55,12 @@ func (s *DeDuplicateSuite) TestDeduplicateSlice() {
 }
 
 func (s *DeDuplicateSuite) TestDeduplicateNilSlice() {
+	type Object struct {
+		slice   []int
+		pointer *int
+		value   string
+	}
+
 	s.Run("empty slice should return empty slice", func() {
 		dd := NewDeduplicator[int]()
 		deduped := dd.Deduplicate([]int{})
@@ -63,6 +69,22 @@ func (s *DeDuplicateSuite) TestDeduplicateNilSlice() {
 
 	s.Run("nil slice should return nil slice", func() {
 		dd := NewDeduplicator[int]()
+		deduped := dd.Deduplicate(nil)
+		s.Nil(deduped)
+	})
+
+	s.Run("empty object slice should return empty slice", func() {
+		dd := NewObjectDeduplicator[Object](func(v Object) string {
+			return v.value
+		})
+		deduped := dd.Deduplicate([]Object{})
+		s.Equal(deduped, []Object{})
+	})
+
+	s.Run("nil object slice should return nil slice", func() {
+		dd := NewObjectDeduplicator[Object](func(v Object) string {
+			return v.value
+		})
 		deduped := dd.Deduplicate(nil)
 		s.Nil(deduped)
 	})
