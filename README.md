@@ -1,4 +1,6 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/lobocv/simplerr.svg)](https://pkg.go.dev/github.com/lobocv/simpleflow)
+[![Github tag](https://badgen.net/github/tag/lobocv/simpleflow)](https://github.com/lobocv/simpleflow/tags)
+[![Go version](https://img.shields.io/github/go-mod/go-version/lobocv/simpleflow)](https://github.com/gomods/athens)
 ![Build Status](https://github.com/lobocv/simpleflow/actions/workflows/build.yaml/badge.svg)
 [![GoReportCard](https://goreportcard.com/badge/github.com/lobocv/simpleflow)](https://goreportcard.com/report/github.com/lobocv/simpleflow)
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-100%25-brightgreen.svg?longCache=true&style=flat)</a>
