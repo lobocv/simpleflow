@@ -230,7 +230,7 @@ segments := SegmentSlice(items, func(v int) int {
 // segments == map[string][]int{"even": {0, 2, 4}, "odd": {1, 3, 5}}
 ```
 
-# Deduplication
+## Deduplication
 A series of values can be deduplicated using the `Deduplicator{}`. It can either accept the entire slice:
 
 ```go
@@ -275,7 +275,7 @@ dd := NewObjectDeduplicator[Object](func(v Object) string {
 ```
 
 
-# Counter
+## Counter
 The `Counter{}` and `ObjectCounter{}` can be used to count the number of occurrences
 of values. Much like the `Deduplicator{}`, the `Counter{}` works well for simple types.
 
@@ -312,12 +312,12 @@ counter := NewObjectCounter[Object](func(v Object) string {
 ```
 
 
-# Time
+## Time
 
 The `simeplflow/time` package provides functions that assist with working with the standard library `time` package
 and `time.Time` objects. The package contains functions to define, compare and iterate time ranges.
 
-# Timeseries
+## Timeseries
 
 The `simpleflow/timeseries` packages contains a generic `TimeSeries` object that allows you
 to manipulate timestamped data. `TimeSeries` store unordered time series data in an underlying 
