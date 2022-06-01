@@ -21,6 +21,11 @@ Please see the tests for examples on how to use these functions.
 - Worker pools are simple, worker pools with error handling are not.
 - 100% test coverage
 
+# Installation
+```
+go get -u github.com/lobocv/simpleflow
+```
+
 ## Table of Contents
 
 1. [Channels](https://github.com/lobocv/simpleflow#channels)
