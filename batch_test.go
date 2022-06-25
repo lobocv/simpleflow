@@ -1,8 +1,9 @@
 package simpleflow
 
 import (
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type BatchSuite struct {
@@ -182,4 +183,24 @@ func (s *BatchSuite) TestIncrementalBatchMapFromPrePopulatedMap() {
 			s.Nil(batch)
 		}
 	}
+}
+
+func (s *BatchSuite) TestIncrementalBatchSliceLessThanOneBatchSize() {
+	for _, batchSize := range []int{-2, -1, 0, 1} {
+		items := []int{1}
+		remaining, batch := IncrementalBatchSlice(items, batchSize, 2)
+		// We can't know which one is returned due to indeterminate order or map iteration
+		s.Equal(remaining, []int{2})
+		s.Equal(batch, []int{1})
+	}
+}
+
+func (s *BatchSuite) TestIncrementalBatchMapLessThanOneBatchSize() {
+	for _, batchSize := range []int{-2, -1, 0, 1} {
+		items := map[int]int{1: 1}
+		batch := IncrementalBatchMap(items, batchSize, 2, 2)
+		// We can't know which one is returned due to indeterminate order or map iteration
+		s.Len(batch, 1)
+	}
+
 }
