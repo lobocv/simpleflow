@@ -52,7 +52,13 @@ func BatchChan[T any](items <-chan T, size int, to chan []T) {
 // IncrementalBatchSlice incrementally builds slice batches of size `batchSize` by appending to a slice
 // If the slice is larger than `batchSize` elements, a single batch is returned. The remaining
 // elements of the slice are always returned. Batched items are returned from the head of the slice.
+// To avoid errors on the caller side,  passing a batchSize < 1 will result in a batchSize of 1.
 func IncrementalBatchSlice[T any](items []T, batchSize int, v T) (remaining, batch []T) {
+	// prevent bugs on the caller side by using a minimum of 1 batchSize
+	if batchSize < 1 {
+		batchSize = 1
+	}
+
 	items = append(items, v)
 	if len(items) >= batchSize {
 		remaining = items[batchSize:]
@@ -68,7 +74,12 @@ func IncrementalBatchSlice[T any](items []T, batchSize int, v T) (remaining, bat
 // If the map is larger than `batchSize` elements, a single batch is returned along with the remaining
 // elements of the map. Batched items are chosen by iterating the (unordered) map and thus you cannot make
 // assumptions on which keys will exist in the batch.
+// To avoid errors on the caller side,  passing a batchSize < 1 will result in a batchSize of 1.
 func IncrementalBatchMap[K comparable, V any](items map[K]V, batchSize int, k K, v V) (batch map[K]V) {
+	// prevent bugs on the caller side by using a minimum of 1 batchSize
+	if batchSize < 1 {
+		batchSize = 1
+	}
 	items[k] = v
 	if len(items) >= batchSize {
 		batch = make(map[K]V, batchSize)
