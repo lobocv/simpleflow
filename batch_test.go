@@ -30,6 +30,24 @@ func (s *BatchSuite) TestBatchSlice() {
 		s.Equal(expected, batches)
 	})
 
+	s.Run("exactly batch size", func() {
+		batches := BatchSlice(items, len(items))
+		expected := [][]int{items}
+		s.Equal(expected, batches)
+	})
+
+	s.Run("empty slice", func() {
+		batches := BatchSlice([]int{}, 3)
+		expected := [][]int{}
+		s.Equal(expected, batches)
+	})
+
+	s.Run("zero batch size", func() {
+		batches := BatchSlice(items, 0)
+		expected := [][]int{}
+		s.Equal(expected, batches)
+	})
+
 }
 
 func (s *BatchSuite) TestBatchChan() {
@@ -67,6 +85,15 @@ func (s *BatchSuite) TestBatchChan() {
 		s.Equal(expected, batches)
 	})
 
+	s.Run("zero batch size", func() {
+		items := initData()
+		out := make(chan []int, 0)
+		BatchChan(items, 0, out)
+		close(out)
+		batches := ChannelToSlice(out)
+		s.Nil(batches)
+	})
+
 }
 
 func (s *BatchSuite) TestMapSlice() {
@@ -87,6 +114,23 @@ func (s *BatchSuite) TestMapSlice() {
 		s.Len(batches[1], 4)
 	})
 
+	s.Run("exactly batch size", func() {
+		batches := BatchMap(items, len(items))
+		s.Len(batches, 1)
+		s.Len(batches[0], len(items))
+	})
+
+	s.Run("empty slice", func() {
+		batches := BatchMap(map[int]int{}, 3)
+		expected := []map[int]int{}
+		s.Equal(expected, batches)
+	})
+
+	s.Run("zero batch size", func() {
+		batches := BatchMap(items, 0)
+		expected := []map[int]int{}
+		s.Equal(expected, batches)
+	})
 }
 
 func (s *BatchSuite) TestIncrementalBatchSliceFromEmptySlice() {
