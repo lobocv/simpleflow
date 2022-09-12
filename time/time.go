@@ -45,6 +45,11 @@ func AbsDelta(t1, t2 time.Time) time.Duration {
 	return d
 }
 
+// Between returns true if `t` is between `t1` and `t2`, inclusive
+func Between(t, t1, t2 time.Time) bool {
+	return (t.After(t1) || t.Equal(t1)) && (t.Before(t2) || t.Equal(t2))
+}
+
 // YearsAgo returns a time.Time n years back in time from now
 func YearsAgo[T Signed](n T) time.Time {
 	return time.Now().AddDate(int(-n), 0, 0)

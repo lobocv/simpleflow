@@ -84,3 +84,19 @@ func (s TestSuite) TestAbsDelta() {
 	delta = AbsDelta(t2, t1)
 	s.Equal(delta, expectedDelta)
 }
+
+func (s TestSuite) TestBetween() {
+	t0 := time.Date(2022, 01, 01, 0, 0, 0, 0, time.UTC)
+	t1 := time.Date(2022, 02, 02, 14, 15, 16, 0, time.UTC)
+	t2 := time.Date(2022, 02, 03, 0, 0, 0, 0, time.UTC)
+
+	s.True(Between(t1, t0, t2))
+	s.False(Between(t2, t0, t1))
+	s.False(Between(t0, t1, t2))
+
+	// Test inclusive range
+	s.True(Between(t1, t1, t1))
+	s.True(Between(t1, t1, t2))
+	s.True(Between(t2, t1, t2))
+	s.True(Between(t2, t2, t2))
+}
