@@ -1,9 +1,10 @@
 package simpletime
 
 import (
-	"github.com/stretchr/testify/suite"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type TestSuite struct {
@@ -15,17 +16,12 @@ func TestTime(t *testing.T) {
 	suite.Run(t, s)
 }
 
-// daysAgo takes the current date (in UTC) and subtracts the input argument number of days
-func daysAgo(nDays int) time.Time {
-	return time.Now().UTC().AddDate(0, 0, -nDays)
-}
-
 func (s TestSuite) TestEarliestAndLatest() {
 	times := []time.Time{
-		daysAgo(10),
-		daysAgo(5),
-		daysAgo(3),
-		daysAgo(0),
+		DaysAgo(10),
+		DaysAgo(5),
+		DaysAgo(3),
+		DaysAgo(0),
 	}
 
 	earliest := Earliest(times...)
@@ -41,4 +37,66 @@ func (s TestSuite) TestEarliestAndLatest() {
 	// Check edge case with no inputs
 	s.Equal(time.Time{}, Latest())
 	s.Equal(time.Time{}, Earliest())
+}
+
+func (s TestSuite) TestAgoAndFromNow() {
+	testCases := []struct {
+		fn            func(n int) time.Time
+		expectedDiff  time.Duration
+		expectedDelta time.Duration
+	}{
+		{fn: SecondsAgo[int], expectedDiff: -2 * time.Second},
+		{fn: MinutesAgo[int], expectedDiff: -2 * time.Minute},
+		{fn: HoursAgo[int], expectedDiff: -2 * time.Hour},
+		{fn: DaysAgo[int], expectedDiff: -48 * time.Hour},
+		{fn: MonthsAgo[int], expectedDiff: time.Now().AddDate(0, -2, 0).Sub(time.Now())},
+		{fn: YearsAgo[int], expectedDiff: time.Now().AddDate(-2, 0, 0).Sub(time.Now())},
+		{fn: SecondsFromNow[int], expectedDiff: 2 * time.Second},
+		{fn: MinutesFromNow[int], expectedDiff: 2 * time.Minute},
+		{fn: HoursFromNow[int], expectedDiff: 2 * time.Hour},
+		{fn: DaysFromNow[int], expectedDiff: 48 * time.Hour},
+		{fn: MonthsFromNow[int], expectedDiff: time.Now().AddDate(0, 2, 0).Sub(time.Now())},
+		{fn: YearsFromNow[int], expectedDiff: time.Now().AddDate(2, 0, 0).Sub(time.Now())},
+	}
+
+	for ii, tc := range testCases {
+		// Get the time from the function being tested
+		t := tc.fn(2)
+		// determine the expected time
+		expect := time.Now().Add(tc.expectedDiff)
+		// Check that they don't differ by very much (should be only the difference between the two calls to time.Now())
+		deltaExpected := t.Sub(expect)
+		if deltaExpected < 0 {
+			deltaExpected *= -1
+		}
+		s.Less(deltaExpected, time.Millisecond, "Test case failed:", ii+1)
+	}
+}
+
+func (s TestSuite) TestAbsDelta() {
+	expectedDelta := 15 * time.Second
+	t1 := time.Date(2022, 02, 02, 14, 15, 16, 0, time.UTC)
+	t2 := t1.Add(expectedDelta)
+
+	// Delta should be the same regardless of the order t1 and t2 are passed in. Value should be positive.
+	delta := AbsDelta(t1, t2)
+	s.Equal(delta, expectedDelta)
+	delta = AbsDelta(t2, t1)
+	s.Equal(delta, expectedDelta)
+}
+
+func (s TestSuite) TestBetween() {
+	t0 := time.Date(2022, 01, 01, 0, 0, 0, 0, time.UTC)
+	t1 := time.Date(2022, 02, 02, 14, 15, 16, 0, time.UTC)
+	t2 := time.Date(2022, 02, 03, 0, 0, 0, 0, time.UTC)
+
+	s.True(Between(t1, t0, t2))
+	s.False(Between(t2, t0, t1))
+	s.False(Between(t0, t1, t2))
+
+	// Test inclusive range
+	s.True(Between(t1, t1, t1))
+	s.True(Between(t1, t1, t2))
+	s.True(Between(t2, t1, t2))
+	s.True(Between(t2, t2, t2))
 }
