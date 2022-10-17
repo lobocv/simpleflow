@@ -1,9 +1,10 @@
 package simpleflow
 
 import (
-	"github.com/stretchr/testify/suite"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type SegmentSuite struct {
@@ -17,7 +18,7 @@ func TestSegment(t *testing.T) {
 
 // Segment the items into two slices, one with even values and one with odd values
 func (s *SegmentSuite) TestSegmentSlice() {
-	items := []int{0, 1, 2, 3, 4, 5}
+	items := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 	segments := SegmentSlice(items, func(v int) string {
 		if v%2 == 0 {
@@ -26,8 +27,8 @@ func (s *SegmentSuite) TestSegmentSlice() {
 		return "odd"
 	})
 	s.Len(segments, 2)
-	s.ElementsMatch(segments["even"], []int{0, 2, 4})
-	s.ElementsMatch(segments["odd"], []int{1, 3, 5})
+	s.ElementsMatch(segments["even"], []int{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20})
+	s.ElementsMatch(segments["odd"], []int{1, 3, 5, 7, 9, 11, 13, 15, 17, 19})
 }
 
 // Segment the items in a channel into two slices, one with even values and one with odd values
