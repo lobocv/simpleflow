@@ -69,7 +69,7 @@ func (s TestSuite) TestAgoAndFromNow() {
 		if deltaExpected < 0 {
 			deltaExpected *= -1
 		}
-		s.Less(deltaExpected, time.Millisecond, "Test case failed:", ii+1)
+		s.Less(deltaExpected, 2*time.Millisecond, "Test case failed:", ii+1)
 	}
 }
 
