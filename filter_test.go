@@ -17,7 +17,7 @@ func TestFilter(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *FilterSuite) TestFilterInplace() {
+func (s *FilterSuite) TestFilterSliceInplace() {
 
 	testCases := map[string]struct {
 		in       []int
@@ -43,7 +43,7 @@ func (s *FilterSuite) TestFilterInplace() {
 
 }
 
-func (s *FilterSuite) TestFilter() {
+func (s *FilterSuite) TestFilterSlice() {
 
 	testCases := map[string]struct {
 		in       []int
@@ -65,4 +65,33 @@ func (s *FilterSuite) TestFilter() {
 		require.NotEqual(s.T(), fmt.Sprintf("%p", tc.in), fmt.Sprintf("%p", out))
 	}
 
+}
+
+func (s *FilterSuite) TestFilterMap() {
+
+	in := map[string]int{"negative_one": -1, "zero": 0, "one": 1, "two": 2, "three": 3}
+	expected := map[string]int{"one": 1, "two": 2, "three": 3}
+
+	getPositive := func(key string, value int) bool {
+		return value > 0
+	}
+
+	out := FilterMap(in, getPositive)
+
+	require.Equal(s.T(), expected, out)
+
+}
+
+func (s *FilterSuite) TestFilterMapInplace() {
+
+	in := map[string]int{"negative_one": -1, "zero": 0, "one": 1, "two": 2, "three": 3}
+	expected := map[string]int{"one": 1, "two": 2, "three": 3}
+
+	getPositive := func(key string, value int) bool {
+		return value > 0
+	}
+
+	FilterMapInplace(in, getPositive)
+
+	require.Equal(s.T(), expected, in)
 }
