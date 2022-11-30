@@ -36,11 +36,13 @@ go get -u github.com/lobocv/simpleflow
 4. [Round Robin](https://github.com/lobocv/simpleflow#round-robin)
 5. [Batching](https://github.com/lobocv/simpleflow#batching)
 6. [Incremental Batching](https://github.com/lobocv/simpleflow#incremental-batching)
-7. [Segmenting](https://github.com/lobocv/simpleflow#segmenting)
-8. [Deduplication](https://github.com/lobocv/simpleflow#deduplication)
-9. [Counter](https://github.com/lobocv/simpleflow#counter)
-10. [Time](https://github.com/lobocv/simpleflow#time)
-11. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
+7. [Filtering](https://github.com/lobocv/simpleflow#filtering)
+8. [Extracting](https://github.com/lobocv/simpleflow#extracting)
+9. [Segmenting](https://github.com/lobocv/simpleflow#segmenting)
+10. [Deduplication](https://github.com/lobocv/simpleflow#deduplication)
+11. [Counter](https://github.com/lobocv/simpleflow#counter)
+12. [Time](https://github.com/lobocv/simpleflow#time)
+13. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
 
 ## Channels
 
@@ -207,9 +209,55 @@ items, batch = IncrementalBatchSlice(items, batchSize, 3)
 
 items, batch = IncrementalBatchSlice(items, batchSize, 4)
 // items == []int{4}, batch == nil
+```
 
+## Filtering
 
+Filtering operations allows you to remove elements from slices or maps. Filtering can done either in-place with
+`FilterSliceInplace`, `FilterMapInPlace` or by creating a copy `FilterSlice`, `FilterMap`. 
 
+The following example filters the positive numbers from the slice of integers:
+
+```go
+getPositive := func(t int) bool {
+    return t > 0
+}
+
+out := FilterSlice([]int{5, -2, 3, 1, 0, -3, -5, -6}, getPositive)
+// out == []int{5, 3, 1}
+```
+
+## Extracting
+
+Extraction operations allow you to extract elements from slices to another slice (`ExtractToSlice`) or to a channel
+(`ExtractToChannel`). Extraction functions accept a function which takes in each element of the slice and returns the
+element to extract (potentially different than the input type) and a boolean for whether the element should be extracted.
+
+The following example extracts the `Name` field from a slice of `Object`.
+
+```go
+type Object struct {
+    Name string
+}
+
+in := []Object{
+    {Name: "John"},
+    {Name: "Paul"},
+    {Name: "George"},
+    {Name: "Ringo"},
+    {Name: "Bob"},
+}
+var names []string
+
+fn := func(t Object) (string, bool) {
+    if t.Name == "Bob" {
+        return "", false
+    }
+    return t.Name, true
+}
+
+names = ExtractToSlice(in, fn, names)
+// names == []string{"John", "Paul", "George", "Ringo"}
 ```
 
 ## Segmenting
