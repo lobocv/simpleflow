@@ -70,7 +70,29 @@ func (s *ExtractSuite) TestExtractToChannel() {
 	close(names)
 
 	require.Len(s.T(), names, 4)
-	
+
 	expected := []string{"John", "Paul", "George", "Ringo"}
 	require.Equal(s.T(), expected, ChannelToSlice(names))
+}
+
+func (s *ExtractSuite) TestExtractFirst() {
+
+	values := []int{4, 1, 5, 7}
+	fn := func(v int) bool {
+		return v > 4
+	}
+
+	v, found := ExtractFirst(values, fn)
+	expected := 5
+	require.True(s.T(), found)
+	require.Equal(s.T(), expected, v)
+
+	fn = func(v int) bool {
+		return v > 10
+	}
+	v, found = ExtractFirst(values, fn)
+	expected = 0
+	require.False(s.T(), found)
+	require.Equal(s.T(), expected, v)
+
 }
