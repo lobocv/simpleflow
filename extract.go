@@ -23,3 +23,15 @@ func ExtractToChannel[T, V any](in []T, fn func(T) (V, bool), out chan V) {
 	}
 	return
 }
+
+// ExtractFirst returns the first element in the slice for which fn(element) == true.
+// If no matches are found, the second return argument is false.
+func ExtractFirst[T any](values []T, fn func(T) bool) (v T, exists bool) {
+	for ii := 0; ii < len(values); ii++ {
+		if fn(values[ii]) {
+			return values[ii], true
+		}
+	}
+
+	return v, false
+}

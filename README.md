@@ -229,8 +229,7 @@ out := FilterSlice([]int{5, -2, 3, 1, 0, -3, -5, -6}, getPositive)
 
 ## Extracting
 
-Extraction operations allow you to extract elements from slices to another slice (`ExtractToSlice`) or to a channel
-(`ExtractToChannel`). Extraction functions accept a function which takes in each element of the slice and returns the
+Extraction operations allow you to extract one or more elements from a slice. Extraction functions accept a function which takes in each element of the slice and returns the
 element to extract (potentially different than the input type) and a boolean for whether the element should be extracted.
 
 The following example extracts the `Name` field from a slice of `Object`.
@@ -258,6 +257,19 @@ fn := func(t Object) (string, bool) {
 
 names = ExtractToSlice(in, fn, names)
 // names == []string{"John", "Paul", "George", "Ringo"}
+```
+
+`ExtractFirst()` can be used to extract the first element in the slice. The following example extracts the first value
+larger than 4.
+
+```go
+values := []int{4, 1, 5, 7}
+fn := func(v int) bool {
+    return v > 4
+}
+
+v, found := ExtractFirst(values, fn)
+// v == 5, found == true
 ```
 
 ## Segmenting
