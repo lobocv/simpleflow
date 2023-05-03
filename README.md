@@ -36,13 +36,14 @@ go get -u github.com/lobocv/simpleflow
 4. [Round Robin](https://github.com/lobocv/simpleflow#round-robin)
 5. [Batching](https://github.com/lobocv/simpleflow#batching)
 6. [Incremental Batching](https://github.com/lobocv/simpleflow#incremental-batching)
-7. [Filtering](https://github.com/lobocv/simpleflow#filtering)
-8. [Extracting](https://github.com/lobocv/simpleflow#extracting)
-9. [Segmenting](https://github.com/lobocv/simpleflow#segmenting)
-10. [Deduplication](https://github.com/lobocv/simpleflow#deduplication)
-11. [Counter](https://github.com/lobocv/simpleflow#counter)
-12. [Time](https://github.com/lobocv/simpleflow#time)
-13. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
+7. [Transforming](https://github.com/lobocv/simpleflow#transforming)
+8. [Filtering](https://github.com/lobocv/simpleflow#filtering)
+9. [Extracting](https://github.com/lobocv/simpleflow#extracting)
+10. [Segmenting](https://github.com/lobocv/simpleflow#segmenting)
+11. [Deduplication](https://github.com/lobocv/simpleflow#deduplication)
+12. [Counter](https://github.com/lobocv/simpleflow#counter)
+13. [Time](https://github.com/lobocv/simpleflow#time)
+14. [Time Series](https://github.com/lobocv/simpleflow#timeseries)
 
 ## Channels
 
@@ -211,10 +212,28 @@ items, batch = IncrementalBatchSlice(items, batchSize, 4)
 // items == []int{4}, batch == nil
 ```
 
+## Transforming
+
+Transformation operations (often named `map()` in other languages) allow you to transform each element of a slice to
+another value using a given transformation function.  
+
+```go
+out := Transform([]int{1, 2, 3}, func(t int) string {
+    return strconv.Itoa(t)
+})
+// out == []string{"1", "2", "3"}
+
+out = TransformAndFilter([]int{1, 2, 3, 4, 5}, func(t int) (int, bool) {
+    return 2 * t,  t%2 == 0
+})
+// out == []string{4, 8}
+```
+
 ## Filtering
 
 Filtering operations allows you to remove elements from slices or maps. Filtering can done either in-place with
-`FilterSliceInplace`, `FilterMapInPlace` or by creating a copy `FilterSlice`, `FilterMap`. 
+`FilterSliceInplace`, `FilterMapInPlace` or by creating a copy `FilterSlice`, `FilterMap`. The filtering function
+argument must return `true` if you want to keep the element.
 
 The following example filters the positive numbers from the slice of integers:
 
